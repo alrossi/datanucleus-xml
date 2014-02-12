@@ -102,7 +102,7 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory
     {
         /** The XML File. */
         File file;
-        
+
         public ManagedConnectionImpl()
         {
         }
@@ -154,7 +154,7 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory
                 try
                 {
                     TransformerFactory tf = TransformerFactory.newInstance();
-                    tf.setAttribute("indent-number", indent);
+                    setIndentPreference(tf);
                     Transformer t = tf.newTransformer();
                     t.setOutputProperty(OutputKeys.INDENT, "yes");
                     t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "" + indent);
@@ -191,7 +191,7 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory
                 try
                 {
                     TransformerFactory tf = TransformerFactory.newInstance();
-                    tf.setAttribute("indent-number", indent);
+                    setIndentPreference(tf);
                     Transformer t = tf.newTransformer();
                     t.setOutputProperty(OutputKeys.INDENT, "yes");
                     t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "" + indent);
@@ -221,6 +221,18 @@ public class ConnectionFactoryImpl extends AbstractConnectionFactory
         public XAResource getXAResource()
         {
             return null;
+        }
+
+        private void setIndentPreference(TransformerFactory tf) {
+            // External library implementations of javax.xml.transform.TransformerFactory
+            // may not support this attribute or may not use 'indent-number' as
+            // its name; it is best in this case simply to move on.
+            try {
+                tf.setAttribute("indent-number", indent);
+            } catch (IllegalArgumentException e) {
+                NucleusLogger.CONNECTION.warn(tf.getClass().getName()
+                                + " does not support the 'indent-number' attribute name; this setting will be ignored", e);
+            }
         }
     }
 }
